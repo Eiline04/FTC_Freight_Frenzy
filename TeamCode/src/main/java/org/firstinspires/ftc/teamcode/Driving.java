@@ -29,19 +29,13 @@ public class Driving extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         lifter = new Lifter(hardwareMap, telemetry);
         intake = new Intake(hardwareMap, telemetry);
-        intakeWatchdog = new IntakeWatchdog(intake, hardwareMap, telemetry);
+        intakeWatchdog = new IntakeWatchdog(intake, hardwareMap, telemetry, gamepad1, gamepad2);
         intakeWatchdog.enable();
 
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
 
-        PIDFCoefficients defaultPIDF = lifter.getPidfCoefficients();
-        telemetry.addData("Default PIDF Coefficients", defaultPIDF.p + " " + defaultPIDF.i + " " + defaultPIDF.d + " " + defaultPIDF.f);
-        telemetry.update();
-
         waitForStart();
-
-        telemetry.log().clear();
 
         while (opModeIsActive()) {
             controller1.update();
@@ -65,12 +59,12 @@ public class Driving extends LinearOpMode {
             }
 
             //Intake Motor
-            if (controller2.AOnce()) {
+            if (controller2.AOnce() && !gamepad2.start) {
                 intake.lowerIntake();
                 sleep(100);
                 intake.startIntake();
             }
-            if (controller2.BOnce()) {
+            if (controller2.BOnce() && !gamepad2.start) {
                 intake.stopIntake();
             }
             if (controller2.XOnce()) {
@@ -113,12 +107,6 @@ public class Driving extends LinearOpMode {
             if (controller1.dpadLeftOnce()) {
                 lifter.closeBox();
             }
-
-//            telemetry.addData("Lifter Position", lifter.getLifterPosition());
-//            telemetry.addData("Intake Distance", intakeWatchdog.getDistance());
-//            telemetry.addData("Lifter", Lifter.running);
-//            telemetry.update();
-
         }
 
     }

@@ -17,7 +17,7 @@ public class LifterPIDTuner extends LinearOpMode {
     ControllerInput controller1;
     Lifter lifter;
 
-    public static double kP = 5;
+    public static double kP = 10;
     public static double kI = 0;
     public static double kD = 0;
     public static double f = 0;

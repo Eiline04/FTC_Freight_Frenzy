@@ -21,11 +21,9 @@ public class Wheels {
     private List<DcMotorEx> motors;
 
     private HardwareMap hardwareMap;
-    private Telemetry telemetry;
 
     public Wheels(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
-        //this.telemetry = telemetry;
 
         leftFront = hardwareMap.get(DcMotorEx.class, "FL");
         leftRear = hardwareMap.get(DcMotorEx.class, "BL");

@@ -42,7 +42,7 @@ public class Lifter {
 
         pidfCoefficients = lifter.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
 
-        setPIDFCoefficients(new PIDFCoefficients(20,0,0,0));
+        setPIDFCoefficients(new PIDFCoefficients(10, 0, 0, 0));
 
         closeBox();
     }
@@ -77,6 +77,18 @@ public class Lifter {
         dumpingBox.setPosition(0.0);
     }
 
+    public void openBox_Thread(long wait) {
+        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(wait, 0.8);
+        Thread thread = new Thread(dumpingBoxThread);
+        thread.start();
+    }
+
+    public void closeBox_Thread(long wait) {
+        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(wait, 0.0);
+        Thread thread = new Thread(dumpingBoxThread);
+        thread.start();
+    }
+
     public void intermediateBoxPosition() {
         dumpingBox.setPosition(0.5);
     }
@@ -89,9 +101,7 @@ public class Lifter {
 
     public void depositMineral() {
         openBox();
-        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(500, 0.0); //close box
-        Thread thread = new Thread(dumpingBoxThread);
-        thread.start();
+        closeBox_Thread(500);
         goToPosition(1000, 0);
     }
 
@@ -112,8 +122,6 @@ public class Lifter {
 
         @Override
         public void run() {
-            telemetry.log().clear();
-
             if (running) {
                 //if another thread is running don't use this one
                 telemetry.addLine("Already running");
@@ -130,20 +138,13 @@ public class Lifter {
                 }
             }
 
+            //We might already be at the target position
+            if (Math.abs(currentPosition - targetPosition) < 10) return;
+
             //go to targetPosition
             int direction = currentPosition > targetPosition ? -1 : 1;
-            if(direction == 1) setPIDFCoefficients(new PIDFCoefficients(10,0,0,0));
-            else setPIDFCoefficients(new PIDFCoefficients(10,0,0,0));
             lifter.setTargetPosition(targetPosition);
             lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-//            telemetry.addData("Current Position", currentPosition);
-//            telemetry.addData("Target Position", targetPosition);
-//            telemetry.addData("Target Position reported by motor", lifter.getTargetPosition());
-//            telemetry.addData("Direction", direction);
-//            telemetry.addData("Is motor busy?", lifter.isBusy());
-//            telemetry.update();
-
             lifter.isBusy(); //this is so stupid
 
             if (direction == -1) lifter.setPower(-0.4);
@@ -153,9 +154,6 @@ public class Lifter {
             }
             lifter.setPower(0.0);
             lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            telemetry.addLine("Thread Finished");
-            telemetry.update();
-
             running = false;
         }
     }
@@ -179,15 +177,7 @@ public class Lifter {
                     e.printStackTrace();
                 }
             }
-
             dumpingBox.setPosition(pos);
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             running = false;
         }
     }
