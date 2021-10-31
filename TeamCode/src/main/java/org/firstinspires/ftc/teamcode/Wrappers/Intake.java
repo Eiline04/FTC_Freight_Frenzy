@@ -6,16 +6,23 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Intake {
     public DcMotorEx intake;
     private int direction = 1;
+    public static volatile boolean running = false;
 
     public Servo leftServo;
     public Servo rightServo;
-    private HardwareMap hardwareMap;
 
-    public Intake(HardwareMap hardwareMap) {
+    private HardwareMap hardwareMap;
+    private Telemetry telemetry;
+
+    public Intake(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
+
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         leftServo = hardwareMap.get(Servo.class, "intakeLeftServo");
         rightServo = hardwareMap.get(Servo.class, "intakeRightServo");
@@ -25,7 +32,7 @@ public class Intake {
         intake.setPower(0.0);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        setIntakePosition(0.0);
+        raiseIntake();
     }
 
     public void startIntake() {
@@ -49,7 +56,53 @@ public class Intake {
         setIntakePosition(0.35);
     }
 
+    public void raiseIntake_Thread(long wait) {
+        IntakeServoThread intakeServoThread = new IntakeServoThread(wait, 0.35);
+        Thread thread = new Thread(intakeServoThread);
+        thread.start();
+    }
+
     public void lowerIntake() {
         setIntakePosition(0.0);
+    }
+
+    public void lowerIntake_Thread(long wait) {
+        IntakeServoThread intakeServoThread = new IntakeServoThread(wait, 0.0);
+        Thread thread = new Thread(intakeServoThread);
+        thread.start();
+    }
+
+    class IntakeServoThread implements Runnable {
+        long wait;
+        double position;
+
+        public IntakeServoThread(long wait, double position) {
+            this.wait = wait;
+            this.position = position;
+        }
+
+        @Override
+        public void run() {
+            if (running) return; //if another thread is running don't use this one
+
+            running = true;
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            setIntakePosition(position);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }

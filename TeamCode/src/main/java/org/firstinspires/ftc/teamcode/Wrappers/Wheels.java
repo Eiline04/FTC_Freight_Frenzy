@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,10 +19,14 @@ import java.util.List;
 public class Wheels {
     public DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
-    public HardwareMap hardwareMap;
+
+    private HardwareMap hardwareMap;
+    private Telemetry telemetry;
 
     public Wheels(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
+        //this.telemetry = telemetry;
+
         leftFront = hardwareMap.get(DcMotorEx.class, "FL");
         leftRear = hardwareMap.get(DcMotorEx.class, "BL");
         rightRear = hardwareMap.get(DcMotorEx.class, "BR");
