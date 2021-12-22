@@ -17,7 +17,7 @@ public class IntakeWatchdog {
     private boolean enabled = false;
     private Intake intake;
 
-    public static double DISTANCE_THRESHOLD = 4; //3
+    public static double DISTANCE_THRESHOLD = 4;
     public static long WATCHDOG_DELAY = 3;
     public ElapsedTime timer;
     private Gamepad gamepad1, gamepad2;
@@ -41,13 +41,13 @@ public class IntakeWatchdog {
     public void update() {
         if (!enabled) return;
         rawDistance = distanceSensor.getDistance(DistanceUnit.CM);
-        if(timer.seconds() < WATCHDOG_DELAY)  return;
+        if (timer.seconds() < WATCHDOG_DELAY) return;
 
-        if(rawDistance < DISTANCE_THRESHOLD) {
-            gamepad1.rumble(200);
-            gamepad2.rumble(200);
+        if (rawDistance < DISTANCE_THRESHOLD) {
+            gamepad1.rumble(1,0,200);
+            gamepad2.rumble(1,0,200);
             intake.raiseIntake();
-            intake.stopIntake();
+            intake.stopIntake(200);
             timer.reset();
         }
     }

@@ -43,6 +43,21 @@ public class Intake {
         intake.setPower(0.0);
     }
 
+    public void stopIntake(long wait) {
+        new Thread(() -> {
+            if(Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            intake.setPower(0.0);
+        }).start();
+    }
+
     public void reverseIntake() {
         direction *= -1;
     }
@@ -52,40 +67,11 @@ public class Intake {
         rightServo.setPosition(1 - pos);
     }
 
-    public void raiseIntake() {
-        setIntakePosition(0.35);
-    }
-
-    public void raiseIntake_Thread(long wait) {
-        IntakeServoThread intakeServoThread = new IntakeServoThread(wait, 0.35);
-        Thread thread = new Thread(intakeServoThread);
-        thread.start();
-    }
-
-    public void lowerIntake() {
-        setIntakePosition(0.0);
-    }
-
-    public void lowerIntake_Thread(long wait) {
-        IntakeServoThread intakeServoThread = new IntakeServoThread(wait, 0.0);
-        Thread thread = new Thread(intakeServoThread);
-        thread.start();
-    }
-
-    class IntakeServoThread implements Runnable {
-        long wait;
-        double position;
-
-        public IntakeServoThread(long wait, double position) {
-            this.wait = wait;
-            this.position = position;
-        }
-
-        @Override
-        public void run() {
+    public void setIntakePosition(long wait, double pos) {
+        new Thread(() -> {
             if (running) return; //if another thread is running don't use this one
-
             running = true;
+            if(Thread.currentThread().isInterrupted()) return; //paranoia
 
             if (wait != 0) {
                 try {
@@ -94,15 +80,52 @@ public class Intake {
                     e.printStackTrace();
                 }
             }
+            setIntakePosition(pos);
+            running = false;
+        }).start();
+    }
 
-            setIntakePosition(position);
+    public void raiseIntake() {
+        setIntakePosition(0.35);
+    }
 
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public void raiseIntake(long wait) {
+        new Thread(() -> {
+            if (running) return; //if another thread is running don't use this one
+            running = true;
+            if(Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            raiseIntake();
+            running = false;
+        }).start();
+    }
 
-        }
+    public void lowerIntake() {
+        setIntakePosition(0.0);
+    }
+
+    public void lowerIntake(long wait) {
+        new Thread(() -> {
+            if (running) return; //if another thread is running don't use this one
+            running = true;
+            if(Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            lowerIntake();
+            running = false;
+        }).start();
     }
 }

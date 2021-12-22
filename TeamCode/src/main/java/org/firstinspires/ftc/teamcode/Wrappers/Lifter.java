@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Wrappers;
 
+import android.os.SystemClock;
+
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,18 +13,20 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+@Config
 public class Lifter {
     private DcMotorEx lifter;  //470 ticks max
 
     private PIDFCoefficients pidfCoefficients;
     public static volatile int currentPosition = 0;
 
-    public static volatile boolean running = false;
+    public static volatile boolean box_running = false;
 
     private Servo dumpingBox;
 
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
+    public LifterThread lifterThread;
 
     public Lifter(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -34,19 +39,29 @@ public class Lifter {
         lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lifter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lifter.setDirection(DcMotorSimple.Direction.REVERSE);
-        lifter.setPower(0.0);
 
-        MotorConfigurationType motorConfigurationType = lifter.getMotorType().clone();
-        motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
-        lifter.setMotorType(motorConfigurationType);
+        lifterThread = new LifterThread();
+        Thread lifterRunnable = new Thread(lifterThread);
 
-        pidfCoefficients = lifter.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-
-        setPIDFCoefficients(new PIDFCoefficients(10, 0, 0, 0));
+//        MotorConfigurationType motorConfigurationType = lifter.getMotorType().clone();
+//        motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
+//        lifter.setMotorType(motorConfigurationType);
 
         closeBox();
+        lifterRunnable.start();
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(12, 0, 0, 0);
+        setPIDFCoefficients(pidfCoefficients);
     }
 
+    public PIDFCoefficients getPIDFCoefficients() {
+        return pidfCoefficients;
+    }
+
+    public void setPIDFCoefficients(PIDFCoefficients pidfs) {
+        this.lifter.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfs);
+        pidfCoefficients = pidfs;
+    }
 
     public void update() {
         currentPosition = lifter.getCurrentPosition();
@@ -54,15 +69,6 @@ public class Lifter {
 
     public void setLifterPower(double power) {
         lifter.setPower(power);
-    }
-
-    public void setPIDFCoefficients(PIDFCoefficients pidfCoefficients) {
-        this.pidfCoefficients = pidfCoefficients;
-        lifter.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
-    }
-
-    public PIDFCoefficients getPidfCoefficients() {
-        return pidfCoefficients;
     }
 
     public int getLifterPosition() {
@@ -77,108 +83,121 @@ public class Lifter {
         dumpingBox.setPosition(0.0);
     }
 
-    public void openBox_Thread(long wait) {
-        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(wait, 0.8);
-        Thread thread = new Thread(dumpingBoxThread);
-        thread.start();
+    public void openBox(long wait) {
+        new Thread(() -> {
+            if (box_running) return; //if another thread is running don't use this one
+            box_running = true;
+            if (Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            openBox();
+            box_running = false;
+        }).start();
     }
 
-    public void closeBox_Thread(long wait) {
-        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(wait, 0.0);
-        Thread thread = new Thread(dumpingBoxThread);
-        thread.start();
+    public void closeBox(long wait) {
+        new Thread(() -> {
+            if (box_running) return; //if another thread is running don't use this one
+            box_running = true;
+            if (Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            closeBox();
+            box_running = false;
+        }).start();
     }
 
     public void intermediateBoxPosition() {
         dumpingBox.setPosition(0.5);
     }
 
-    public void intermediateBoxPosition_Thread(long wait) {
-        DumpingBoxThread dumpingBoxThread = new DumpingBoxThread(wait, 0.5);
-        Thread thread = new Thread(dumpingBoxThread);
-        thread.start();
+    public void intermediateBoxPosition(long wait) {
+        new Thread(() -> {
+            if (box_running) return; //if another thread is running don't use this one
+            box_running = true;
+            if (Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            intermediateBoxPosition();
+            box_running = false;
+        }).start();
     }
 
     public void depositMineral() {
         openBox();
-        closeBox_Thread(500);
-        goToPosition(1000, 0);
+        closeBox(500);
     }
 
     public void goToPosition(long waitFor, int targetPosition) {
-        LifterThread lifterThread = new LifterThread(waitFor, targetPosition);
-        Thread thread = new Thread(lifterThread);
-        thread.start();
+        if (waitFor == 0) {
+            lifterThread.setTicks(targetPosition);
+            return;
+        }
+        new Thread(() -> {
+            try {
+                Thread.sleep(waitFor);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            lifterThread.setTicks(targetPosition);
+        }).start();
     }
 
     class LifterThread implements Runnable {
-        long wait;
-        int targetPosition;
+        public volatile boolean kill = false;
+        private volatile int currentTicks = -1;
+        private volatile int lastTicks = -1;
 
-        public LifterThread(long wait_ms, int targetPosition) {
-            this.wait = wait_ms;
-            this.targetPosition = targetPosition;
-        }
+        public double maxVel = 2000;
 
         @Override
         public void run() {
-            if (running) {
-                //if another thread is running don't use this one
-                telemetry.addLine("Already running");
+            while (!kill) {
+                if (currentTicks == -1) continue;
+
+                lifter.setTargetPosition(currentTicks);
+                lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                int direction = currentTicks > lastTicks ? 1 : -1;
+                telemetry.addData("Current Position", lastTicks);
+                telemetry.addData("Target Position", currentTicks);
+                telemetry.addData("Direction", direction);
                 telemetry.update();
-            }
 
-            running = true;
+                if (direction == -1) lifter.setVelocity(-maxVel * 0.4);
+                else lifter.setVelocity(maxVel);
 
-            if (wait != 0) {
-                try {
-                    Thread.sleep(wait);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                lastTicks = currentTicks;
+
+                while (!Thread.currentThread().isInterrupted()) {
+                    //stay here until a new value comes in
+                    if (currentTicks != lastTicks) break;
                 }
+                lifter.setVelocity(0.0);
+                lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-
-            //We might already be at the target position
-            if (Math.abs(currentPosition - targetPosition) < 10) return;
-
-            //go to targetPosition
-            int direction = currentPosition > targetPosition ? -1 : 1;
-            lifter.setTargetPosition(targetPosition);
-            lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lifter.isBusy(); //this is so stupid
-
-            if (direction == -1) lifter.setPower(-0.4);
-            else lifter.setPower(0.8);
-            while (lifter.isBusy() && !Thread.currentThread().isInterrupted()) {
-                //loop
-            }
-            lifter.setPower(0.0);
-            lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            running = false;
-        }
-    }
-
-
-    class DumpingBoxThread implements Runnable {
-        long wait;
-        double pos;
-
-        public DumpingBoxThread(long wait_ms, double pos) {
-            this.wait = wait_ms;
-            this.pos = pos;
         }
 
-        @Override
-        public void run() {
-            if (wait != 0) {
-                try {
-                    Thread.sleep(wait);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            dumpingBox.setPosition(pos);
-            running = false;
+        public void setTicks(int ticks) {
+            if (Math.abs(currentTicks - ticks) < 50) return; //basically already there
+            currentTicks = ticks;
         }
     }
 }

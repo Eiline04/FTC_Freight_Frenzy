@@ -32,7 +32,7 @@ public class LifterPIDTuner extends LinearOpMode {
 
         //Default values: kP: 10   kI: 0.05  kD: 0 F: 0
 
-        PIDFCoefficients defaultPID = lifter.getPidfCoefficients();
+        PIDFCoefficients defaultPID = lifter.getPIDFCoefficients();
         telemetry.addLine("Current Values:");
         telemetry.addData("kP:", defaultPID.p);
         telemetry.addData("kI:", defaultPID.i);
@@ -52,17 +52,19 @@ public class LifterPIDTuner extends LinearOpMode {
         while (opModeIsActive()) {
             controller1.update();
 
-            if (controller1.AOnce() && !Lifter.running) {
+            if (controller1.AOnce()) {
                 //go up
                 PIDFCoefficients newPID = new PIDFCoefficients(kP, kI, kD, f);
                 lifter.setPIDFCoefficients(newPID);
+                sleep(100);
                 lifter.goToPosition(0, maxHeight);
             }
 
-            if (controller1.BOnce() && !Lifter.running) {
+            if (controller1.BOnce()) {
                 //go down
                 PIDFCoefficients newPID = new PIDFCoefficients(kP, kI, kD, f);
                 lifter.setPIDFCoefficients(newPID);
+                sleep(100);
                 lifter.goToPosition(0, 0);
             }
         }
@@ -76,9 +78,8 @@ public class LifterPIDTuner extends LinearOpMode {
                 lifter.update();
                 telemetry.addData("Current Velocity", lifter.getLifterPosition());
                 telemetry.update();
-                sleep(3);
+                sleep(5);
             }
-
         }
     }
 }
