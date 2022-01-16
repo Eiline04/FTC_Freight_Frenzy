@@ -166,7 +166,7 @@ public class Lifter {
         private volatile int currentTicks = -1;
         private volatile int lastTicks = -1;
 
-        public double maxVel = 2000;
+        //public double maxVel = 2000;
 
         @Override
         public void run() {
@@ -176,13 +176,10 @@ public class Lifter {
                 lifter.setTargetPosition(currentTicks);
                 lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 int direction = currentTicks > lastTicks ? 1 : -1;
-                telemetry.addData("Current Position", lastTicks);
-                telemetry.addData("Target Position", currentTicks);
-                telemetry.addData("Direction", direction);
                 telemetry.update();
 
-                if (direction == -1) lifter.setVelocity(-maxVel * 0.4);
-                else lifter.setVelocity(maxVel);
+                if (direction == -1) lifter.setVelocity(-900);
+                else lifter.setVelocity(2500);
 
                 lastTicks = currentTicks;
 

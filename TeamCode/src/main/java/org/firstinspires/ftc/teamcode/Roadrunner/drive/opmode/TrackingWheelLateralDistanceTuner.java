@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.Roadrunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Roadrunner.drive.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.Roadrunner.drive.MecanumDriveImpl;
+import org.firstinspires.ftc.teamcode.Roadrunner.drive.TrackingWheelLocalizerImpl;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s
@@ -70,9 +70,9 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
 
-        if (!(drive.getLocalizer() instanceof StandardTrackingWheelLocalizer)) {
+        if (!(drive.getLocalizer() instanceof TrackingWheelLocalizerImpl)) {
             RobotLog.setGlobalErrorMsg("StandardTrackingWheelLocalizer is not being set in the "
                     + "drive class. Ensure that \"setLocalizer(new StandardTrackingWheelLocalizer"
                     + "(hardwareMap));\" is called in SampleMecanumDrive.java");
@@ -123,7 +123,7 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
         telemetry.clearAll();
         telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
         telemetry.addLine("Effective LATERAL_DISTANCE: " +
-                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * StandardTrackingWheelLocalizer.LATERAL_DISTANCE);
+                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * TrackingWheelLocalizerImpl.LATERAL_DISTANCE);
 
         telemetry.update();
 
