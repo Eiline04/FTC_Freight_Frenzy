@@ -44,8 +44,8 @@ public class IntakeWatchdog {
         if (timer.seconds() < WATCHDOG_DELAY) return;
 
         if (rawDistance < DISTANCE_THRESHOLD) {
-            gamepad1.rumble(1,0,200);
-            gamepad2.rumble(1,0,200);
+//            gamepad1.rumble(1,0,200);
+//            gamepad2.rumble(1,0,200);
             intake.raiseIntake();
             intake.stopIntake(200);
             timer.reset();

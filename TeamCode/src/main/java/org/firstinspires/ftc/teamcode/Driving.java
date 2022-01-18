@@ -4,9 +4,11 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Utilities.ControllerInput;
 import org.firstinspires.ftc.teamcode.Utilities.IntakeWatchdog;
+import org.firstinspires.ftc.teamcode.Wrappers.DuckMechanism;
 import org.firstinspires.ftc.teamcode.Wrappers.Intake;
 import org.firstinspires.ftc.teamcode.Wrappers.Lifter;
 import org.firstinspires.ftc.teamcode.Roadrunner.drive.MecanumDriveImpl;
@@ -21,30 +23,31 @@ public class Driving extends LinearOpMode {
     Lifter lifter;
     IntakeWatchdog intakeWatchdog;
     MeasuringTapeTurret turret;
+    DuckMechanism duckMechanism;
 
-    boolean tseGripState = false; //false = closed
-    boolean tsePlacingState = false; //false = closed
+    public double baseServoPosition, angleServoPosition;
+    public double deltaBase = 0.05, deltaAngle = 0.02;
 
     DcMotorEx encoderLeft, encoderRight;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        tseGripState = false;
         //telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         drive = new MecanumDriveImpl(hardwareMap);
         lifter = new Lifter(hardwareMap, telemetry);
         intake = new Intake(hardwareMap, telemetry);
         turret = new MeasuringTapeTurret(hardwareMap);
+        duckMechanism = new DuckMechanism(hardwareMap);
         intakeWatchdog = new IntakeWatchdog(intake, hardwareMap, telemetry, gamepad1, gamepad2);
         intakeWatchdog.enable();
 
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
 
-//        encoderLeft = hardwareMap.get(DcMotorEx.class,"BR");
-//        encoderRight = hardwareMap.get(DcMotorEx.class, "FR");
+//        encoderLeft = hardwareMap.get(DcMotorEx.class,"FR");
+//        encoderRight = hardwareMap.get(DcMotorEx.class, "BR");
 //        encoderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        encoderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        encoderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -68,17 +71,43 @@ public class Driving extends LinearOpMode {
 
             drive.setWeightedDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
 
+            //Duck Mechanism
+            if (controller1.AOnce()) {
+                //start or stop duck motor
+                if (duckMechanism.running) {
+                    duckMechanism.stopSpin();
+                } else duckMechanism.startSpin();
+            }
+
+            //Tape Mechanism
             if (controller1.rightBumper()) {
                 turret.startExtend();
             } else if (controller1.leftBumper()) {
                 turret.startRetract();
             } else turret.stop();
 
-            if(controller1.AOnce()) {
-                turret.setAngleServoPos(0.5);
+            if (controller1.dpadLeft()) {
+                //move base left
+                baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0, 1);
+                turret.setBasePos(baseServoPosition);
             }
-            if(controller1.BOnce()) {
-                turret.setAngleServoPos(0.2);
+
+            if (controller1.dpadRight()) {
+                //move base right
+                baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0, 1);
+                turret.setBasePos(baseServoPosition);
+            }
+
+            if (controller1.dpadUp()) {
+                //move angle up
+                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.25);
+                turret.setAnglePos(angleServoPosition);
+            }
+
+            if (controller1.dpadDown()) {
+                //move angle down
+                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.25);
+                turret.setAnglePos(angleServoPosition);
             }
 
             //Intake servos
@@ -135,15 +164,6 @@ public class Driving extends LinearOpMode {
 //                    lifter.setLifterPower(0.0);
 //                }
 //            }
-
-            //Dumping Box
-            /*if (controller1.dpadRightOnce()) {
-                lifter.depositMineral();
-            }*/
-
-            if (controller1.dpadLeftOnce()) {
-                lifter.closeBox();
-            }
         }
     }
 
