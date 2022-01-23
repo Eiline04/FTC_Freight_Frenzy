@@ -12,8 +12,10 @@ public class DuckMechanism {
         duckMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         duckMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         duckMotor.setPower(0.0);
+    }
 
-        //duckMotor.setDirection(DcMotorEx.Direction.REVERSE); //if needed
+    public void reverseMotor() {
+        duckMotor.setDirection(DcMotorEx.Direction.REVERSE);
     }
 
     public void startSpin() {
@@ -27,21 +29,16 @@ public class DuckMechanism {
     }
 
     public void spinForMs(long ms) {
-        if (ms == 0) return;
+        if(ms <= 0) return;
         new Thread(() -> {
-            if (Thread.currentThread().isInterrupted()) return; //paranoia
-            if (running) return;
-
             startSpin();
-
+            if(Thread.currentThread().isInterrupted()) return;
             try {
                 Thread.sleep(ms);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             stopSpin();
-
         }).start();
     }
 }

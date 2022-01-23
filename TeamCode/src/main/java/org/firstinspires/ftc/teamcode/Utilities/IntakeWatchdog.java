@@ -20,7 +20,6 @@ public class IntakeWatchdog {
     public static double DISTANCE_THRESHOLD = 4;
     public static long WATCHDOG_DELAY = 3;
     public ElapsedTime timer;
-    private Gamepad gamepad1, gamepad2;
 
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
@@ -30,8 +29,6 @@ public class IntakeWatchdog {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         this.intake = intake;
-        this.gamepad1 = gamepad1;
-        this.gamepad2 = gamepad2;
 
         distanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor");
 
@@ -44,8 +41,6 @@ public class IntakeWatchdog {
         if (timer.seconds() < WATCHDOG_DELAY) return;
 
         if (rawDistance < DISTANCE_THRESHOLD) {
-//            gamepad1.rumble(1,0,200);
-//            gamepad2.rumble(1,0,200);
             intake.raiseIntake();
             intake.stopIntake(200);
             timer.reset();

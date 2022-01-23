@@ -170,7 +170,7 @@ public class Lifter {
 
         @Override
         public void run() {
-            while (!kill) {
+            while (!kill) { //paranoia
                 if (currentTicks == -1) continue;
 
                 lifter.setTargetPosition(currentTicks);
@@ -178,12 +178,11 @@ public class Lifter {
                 int direction = currentTicks > lastTicks ? 1 : -1;
                 telemetry.update();
 
-                if (direction == -1) lifter.setVelocity(-900);
+                if (direction == -1) lifter.setVelocity(-1000);//-900
                 else lifter.setVelocity(2500);
 
                 lastTicks = currentTicks;
-
-                while (!Thread.currentThread().isInterrupted()) {
+                while (true) {
                     //stay here until a new value comes in
                     if (currentTicks != lastTicks) break;
                 }

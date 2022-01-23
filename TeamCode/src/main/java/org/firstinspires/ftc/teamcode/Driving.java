@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
@@ -28,12 +31,15 @@ public class Driving extends LinearOpMode {
     public double baseServoPosition, angleServoPosition;
     public double deltaBase = 0.05, deltaAngle = 0.02;
 
-    DcMotorEx encoderLeft, encoderRight;
+    //Encoders
+    DcMotorEx encoderLeft;
+    DcMotorEx encoderRight;
+    DcMotorEx encoderHorizontal;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        //telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         drive = new MecanumDriveImpl(hardwareMap);
         lifter = new Lifter(hardwareMap, telemetry);
@@ -46,12 +52,17 @@ public class Driving extends LinearOpMode {
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
 
-//        encoderLeft = hardwareMap.get(DcMotorEx.class,"FR");
-//        encoderRight = hardwareMap.get(DcMotorEx.class, "BR");
-//        encoderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        encoderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        encoderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        encoderRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //---------Encoders-------------
+        encoderLeft = hardwareMap.get(DcMotorEx.class,"FR");
+        encoderRight = hardwareMap.get(DcMotorEx.class, "BR");
+        encoderHorizontal = hardwareMap.get(DcMotorEx.class,"FL");
+
+        encoderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoderHorizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoderLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoderRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoderHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
@@ -61,9 +72,10 @@ public class Driving extends LinearOpMode {
             lifter.update();
             intakeWatchdog.update();
 
-//            telemetry.addData("Encoder Left", encoderLeft.getCurrentPosition());
-//            telemetry.addData("Encoder Right", encoderRight.getCurrentPosition());
-//            telemetry.update();
+            telemetry.addData("Left Encoder", encoderLeft.getCurrentPosition());
+            telemetry.addData("Right Encoder", encoderRight.getCurrentPosition());
+            telemetry.addData("Horizontal Encoder", encoderHorizontal.getCurrentPosition());
+            telemetry.update();
 
             double leftStickY = controller1.left_stick_y;
             double leftStickX = controller1.left_stick_x;
@@ -100,13 +112,13 @@ public class Driving extends LinearOpMode {
 
             if (controller1.dpadUp()) {
                 //move angle up
-                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.25);
+                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.35);
                 turret.setAnglePos(angleServoPosition);
             }
 
             if (controller1.dpadDown()) {
                 //move angle down
-                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.25);
+                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.35);
                 turret.setAnglePos(angleServoPosition);
             }
 
@@ -140,7 +152,7 @@ public class Driving extends LinearOpMode {
                 lifter.intermediateBoxPosition(300);
                 sleep(600);
                 lifter.depositMineral();
-                lifter.goToPosition(800, 0);
+                lifter.goToPosition(500, 0);
             }
 
             if (controller2.leftBumperOnce()) {
@@ -164,6 +176,7 @@ public class Driving extends LinearOpMode {
 //                    lifter.setLifterPower(0.0);
 //                }
 //            }
+            
         }
     }
 
