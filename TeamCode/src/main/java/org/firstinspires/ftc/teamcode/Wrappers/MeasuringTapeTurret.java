@@ -19,8 +19,9 @@ public class MeasuringTapeTurret {
         extender.setPower(0.0);
 
         angleServo.setPosition(0.0); //default 0, max 0.25
-        baseServo.setPosition(0.63); // default 0.63 , min 0, max 1
+        baseServo.setPosition(0.95); // default 0.95 , min 0.35, max 0.85
     }
+
 
     public void startExtend() {
         extender.setPower(1.0);
@@ -42,5 +43,7 @@ public class MeasuringTapeTurret {
     public void setBasePos(double pos) {
         baseServo.setPosition(pos);
     }
+
+    public double getBasePos() { return baseServo.getPosition(); }
 
 }

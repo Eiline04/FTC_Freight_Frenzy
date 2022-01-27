@@ -29,7 +29,7 @@ public class Driving extends LinearOpMode {
     DuckMechanism duckMechanism;
 
     public double baseServoPosition, angleServoPosition;
-    public double deltaBase = 0.05, deltaAngle = 0.02;
+    public double deltaBase = 0.008, deltaAngle = 0.01;
 
     //Encoders
     DcMotorEx encoderLeft;
@@ -53,9 +53,9 @@ public class Driving extends LinearOpMode {
         controller2 = new ControllerInput(gamepad2);
 
         //---------Encoders-------------
-        encoderLeft = hardwareMap.get(DcMotorEx.class,"FR");
+        encoderLeft = hardwareMap.get(DcMotorEx.class, "FR");
         encoderRight = hardwareMap.get(DcMotorEx.class, "BR");
-        encoderHorizontal = hardwareMap.get(DcMotorEx.class,"FL");
+        encoderHorizontal = hardwareMap.get(DcMotorEx.class, "FL");
 
         encoderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -100,13 +100,13 @@ public class Driving extends LinearOpMode {
 
             if (controller1.dpadLeft()) {
                 //move base left
-                baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0, 1);
+                baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0.35, 0.85);
                 turret.setBasePos(baseServoPosition);
             }
 
             if (controller1.dpadRight()) {
                 //move base right
-                baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0, 1);
+                baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0.35, 0.85);
                 turret.setBasePos(baseServoPosition);
             }
 
@@ -148,11 +148,16 @@ public class Driving extends LinearOpMode {
 
             //Lifter
             if (controller2.rightBumperOnce()) {
-                lifter.goToPosition(0, 450);
-                lifter.intermediateBoxPosition(300);
-                sleep(600);
+                long waitForTurret = 0;
+                if (Math.abs(turret.getBasePos() - 0.95) > 0.1) {
+                    turret.setBasePos(0.95);
+                    waitForTurret = 700;
+                }
+                lifter.goToPosition(waitForTurret, 450);
+                lifter.intermediateBoxPosition(300 + waitForTurret);
+                sleep(600 + waitForTurret);
                 lifter.depositMineral();
-                lifter.goToPosition(500, 0);
+                lifter.goToPosition(500 + waitForTurret, 0);
             }
 
             if (controller2.leftBumperOnce()) {
@@ -176,7 +181,7 @@ public class Driving extends LinearOpMode {
 //                    lifter.setLifterPower(0.0);
 //                }
 //            }
-            
+
         }
     }
 

@@ -38,7 +38,7 @@ public class Lifter {
         lifter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lifter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lifter.setDirection(DcMotorSimple.Direction.REVERSE);
+        lifter.setDirection(DcMotorSimple.Direction.FORWARD);
 
         lifterThread = new LifterThread();
         Thread lifterRunnable = new Thread(lifterThread);
