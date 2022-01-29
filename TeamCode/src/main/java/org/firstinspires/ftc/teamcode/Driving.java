@@ -5,16 +5,14 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.Roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.Utilities.ControllerInput;
 import org.firstinspires.ftc.teamcode.Utilities.IntakeWatchdog;
 import org.firstinspires.ftc.teamcode.Wrappers.DuckMechanism;
 import org.firstinspires.ftc.teamcode.Wrappers.Intake;
 import org.firstinspires.ftc.teamcode.Wrappers.Lifter;
-import org.firstinspires.ftc.teamcode.Roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.Wrappers.MeasuringTapeTurret;
 
 @TeleOp()
@@ -31,11 +29,6 @@ public class Driving extends LinearOpMode {
     public double baseServoPosition, angleServoPosition;
     public double deltaBase = 0.008, deltaAngle = 0.01;
 
-    //Encoders
-    DcMotorEx encoderLeft;
-    DcMotorEx encoderRight;
-    DcMotorEx encoderHorizontal;
-
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -51,19 +44,6 @@ public class Driving extends LinearOpMode {
 
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
-
-        //---------Encoders-------------
-        encoderLeft = hardwareMap.get(DcMotorEx.class, "FR");
-        encoderRight = hardwareMap.get(DcMotorEx.class, "BR");
-        encoderHorizontal = hardwareMap.get(DcMotorEx.class, "FL");
-
-        encoderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoderHorizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoderLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        encoderRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        encoderHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         waitForStart();
 
         while (opModeIsActive()) {
@@ -72,14 +52,9 @@ public class Driving extends LinearOpMode {
             lifter.update();
             intakeWatchdog.update();
 
-            telemetry.addData("Left Encoder", encoderLeft.getCurrentPosition());
-            telemetry.addData("Right Encoder", encoderRight.getCurrentPosition());
-            telemetry.addData("Horizontal Encoder", encoderHorizontal.getCurrentPosition());
-            telemetry.update();
-
-            double leftStickY = controller1.left_stick_y;
-            double leftStickX = controller1.left_stick_x;
-            double rotation = controller1.right_stick_x;
+            double leftStickY = -controller1.left_stick_y;
+            double leftStickX = -controller1.left_stick_x;
+            double rotation = -controller1.right_stick_x;
 
             drive.setWeightedDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
 
@@ -149,9 +124,11 @@ public class Driving extends LinearOpMode {
             //Lifter
             if (controller2.rightBumperOnce()) {
                 long waitForTurret = 0;
-                if (Math.abs(turret.getBasePos() - 0.95) > 0.1) {
-                    turret.setBasePos(0.95);
-                    waitForTurret = 700;
+                double basePos = turret.getBasePos();
+                if (basePos < 0.97) {
+                    turret.setBasePos(1.0);
+                    //map wait time to distance from 0.97
+                    waitForTurret = (long) Range.scale(basePos, 0.35, 1.0, 700, 10);
                 }
                 lifter.goToPosition(waitForTurret, 450);
                 lifter.intermediateBoxPosition(300 + waitForTurret);

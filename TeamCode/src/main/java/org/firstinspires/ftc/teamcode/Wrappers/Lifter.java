@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Wrappers;
 
-import android.os.SystemClock;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -9,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -178,7 +175,7 @@ public class Lifter {
                 int direction = currentTicks > lastTicks ? 1 : -1;
                 telemetry.update();
 
-                if (direction == -1) lifter.setVelocity(-1000);//-900
+                if (direction == -1) lifter.setVelocity(-700);//-900
                 else lifter.setVelocity(2500);
 
                 lastTicks = currentTicks;

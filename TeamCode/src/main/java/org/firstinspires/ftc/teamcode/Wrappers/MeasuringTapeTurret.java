@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.Wrappers;
 
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 public class MeasuringTapeTurret {
     public CRServo extender;
@@ -19,7 +17,7 @@ public class MeasuringTapeTurret {
         extender.setPower(0.0);
 
         angleServo.setPosition(0.0); //default 0, max 0.25
-        baseServo.setPosition(0.95); // default 0.95 , min 0.35, max 0.85
+        baseServo.setPosition(1.0); // default 1.0 , min 0.35, max 0.85
     }
 
 

@@ -32,7 +32,11 @@ public class Intake {
         intake.setPower(0.0);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        raiseIntake();
+        initIntake();
+    }
+
+    public void initIntake() {
+        setIntakePosition(0.35);
     }
 
     public void startIntake() {
@@ -86,7 +90,7 @@ public class Intake {
     }
 
     public void raiseIntake() {
-        setIntakePosition(0.35);
+        setIntakePosition(0.30);
     }
 
     public void raiseIntake(long wait) {
