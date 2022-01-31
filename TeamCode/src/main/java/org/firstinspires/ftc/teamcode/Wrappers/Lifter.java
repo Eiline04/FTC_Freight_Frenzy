@@ -25,6 +25,15 @@ public class Lifter {
     private Telemetry telemetry;
     public LifterThread lifterThread;
 
+    public enum LEVEL {
+        DOWN(0), FIRST(150), SECOND(300), THIRD(450);
+        public int ticks;
+
+        LEVEL(int ticks) {
+            this.ticks = ticks;
+        }
+    }
+
     public Lifter(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
@@ -141,6 +150,21 @@ public class Lifter {
     public void depositMineral() {
         openBox();
         closeBox(500);
+    }
+
+    public void goToPosition(long waitFor, LEVEL level) {
+        if (waitFor == 0) {
+            lifterThread.setTicks(level.ticks);
+            return;
+        }
+        new Thread(() -> {
+            try {
+                Thread.sleep(waitFor);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            lifterThread.setTicks(level.ticks);
+        }).start();
     }
 
     public void goToPosition(long waitFor, int targetPosition) {

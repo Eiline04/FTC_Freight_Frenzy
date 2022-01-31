@@ -1,6 +1,7 @@
 package com.example.meepmeep;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
@@ -17,31 +18,41 @@ public class MeepMeepViz {
                 .setDimensions(11.96, 13.22)
 
                 .followTrajectorySequence(drive ->
-                                drive.trajectorySequenceBuilder(startPose)
-                                        .lineToLinearHeading(new Pose2d(-16.0, -40.0, radians(260.0)))
-                                        .waitSeconds(0.5)
-                                        .lineToLinearHeading(new Pose2d(-22.0, -51.0, radians(250.0)))
-                                        .lineToLinearHeading(new Pose2d(-55.0, -62.0, radians(270.0)))
-                                        .waitSeconds(2.0)
-                                        .lineToLinearHeading(new Pose2d(-4.0, -54.0, radians(-35.0)))
-                                        .splineToSplineHeading(new Pose2d(50.0, -64.0, radians(0.0)), 0.0)
-                                        .setReversed(true)
-                                        .splineToSplineHeading(new Pose2d(-1, -61.0, radians(350.0)), 10.0)
-                                        //.splineToSplineHeading(new Pose2d(12.0, -63.0, radians(350.0)), radians(10.0))
+                        drive.trajectorySequenceBuilder(startPose)
+                                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
 
-//                                .lineToLinearHeading(new Pose2d(-7.0, -40.0, radians(285.0)))
-//                                .waitSeconds(0.5)
-//
-//                                .splineToSplineHeading(new Pose2d(12.0, -63.0, radians(350.0)), radians(350.0))
-//                                .splineToSplineHeading(new Pose2d(50.0, -64.0, radians(0.0)), 0.0)
-//                                .waitSeconds(1.0)
-//
-//                                .setReversed(true)
-//                                .splineToSplineHeading(new Pose2d(12.0, -63.0, radians(350.0)), radians(0.0))
-//                                //.splineToSplineHeading(new Pose2d(-7.0, -40.0, radians(285.0)), radians(75.0)).setReversed(true)
-//                                .waitSeconds(1.0)
+                                }) //start duck motor
 
-                                        .build()
+                                .lineToLinearHeading(new Pose2d(-55.0, -63.0, radians(270.0)))
+                                .waitSeconds(2.0)
+                                .addDisplacementMarker(() -> {
+
+                                }) //stop duck motor
+
+                                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
+
+                                }) //lifter
+
+                                .lineToLinearHeading(new Pose2d(-9.0, -40.0, radians(280.0)))
+                                .waitSeconds(0.8)
+                                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                                }) //lower lifter
+
+                                //-START OF CYCLE
+                                .splineToSplineHeading(new Pose2d(9.0, -64.0, radians(350.0)), 0.0)
+                                .addDisplacementMarker(() -> {
+                                }) //start intake
+                                .setVelConstraint(new TranslationalVelocityConstraint(30.0))
+                                .splineToLinearHeading(new Pose2d(50.0, -65.0, radians(0.0)), 0.0)
+                                .setReversed(true)
+                                .waitSeconds(1.2)
+                                .splineToSplineHeading(new Pose2d(9.0, -64.0, radians(355.0)), radians(175.0))
+                                .resetVelConstraint()
+                                .splineToSplineHeading(new Pose2d(-9.0, -40.0, radians(280.0)), radians(80.0))
+                                .waitSeconds(0.5)
+                                //-----END OF CYCLE----
+
+                                .build()
                 );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_FREIGHTFRENZY_ADI_DARK)

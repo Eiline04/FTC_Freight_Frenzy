@@ -130,11 +130,11 @@ public class Driving extends LinearOpMode {
                     //map wait time to distance from 0.97
                     waitForTurret = (long) Range.scale(basePos, 0.35, 1.0, 700, 10);
                 }
-                lifter.goToPosition(waitForTurret, 450);
+                lifter.goToPosition(waitForTurret, Lifter.LEVEL.THIRD);
                 lifter.intermediateBoxPosition(300 + waitForTurret);
                 sleep(600 + waitForTurret);
                 lifter.depositMineral();
-                lifter.goToPosition(500 + waitForTurret, 0);
+                lifter.goToPosition(500 + waitForTurret, Lifter.LEVEL.DOWN);
             }
 
             if (controller2.leftBumperOnce()) {
