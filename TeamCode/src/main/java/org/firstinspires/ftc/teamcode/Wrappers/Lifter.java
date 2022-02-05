@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -24,7 +25,7 @@ public class Lifter {
     public LifterThread lifterThread;
 
     public enum LEVEL {
-        DOWN(0), FIRST(150), SECOND(300), THIRD(450);
+        DOWN(20), FIRST(150), SECOND(300), THIRD(450);
         public int ticks;
 
         LEVEL(int ticks) {
@@ -205,11 +206,13 @@ public class Lifter {
 
                 lastTicks = currentTicks;
 
-                if (currentTicks < 50) {
+                if (lastTicks < 50) {
                     lifterMotor.isBusy(); //stupid bug
                     //we are going completely down so don't bother with pid after the fact
+                    ElapsedTime timer = new ElapsedTime();
+                    timer.reset();
                     while (lifterMotor.isBusy()) {
-                        //loop
+                        if(timer.seconds() > 1.2) break;
                     }
                     lifterMotor.setVelocity(0.0);
 

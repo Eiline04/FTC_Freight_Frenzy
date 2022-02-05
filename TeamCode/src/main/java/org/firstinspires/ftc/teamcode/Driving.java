@@ -40,6 +40,7 @@ public class Driving extends LinearOpMode {
         turret = new MeasuringTapeTurret(hardwareMap);
         duckMechanism = new DuckMechanism(hardwareMap);
         intakeWatchdog = new IntakeWatchdog(intake, hardwareMap, telemetry, gamepad1, gamepad2);
+        intakeWatchdog.enable();
 
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
@@ -134,7 +135,7 @@ public class Driving extends LinearOpMode {
 
             if (controller2.leftBumperOnce()) {
                 lifter.closeBox();
-                lifter.goToPosition(0, 0);
+                lifter.goToPosition(0, Lifter.LEVEL.DOWN);
             }
 
             //-----------MANUAL CONTROL---------------

@@ -43,15 +43,15 @@ public class AutoRemote extends LinearOpMode {
         drive.setPoseEstimate(startPose);
         updater.start(); //start calling update for watchdog and lifter
 
-        Lifter.LEVEL result = Lifter.LEVEL.THIRD;
-        TrajectorySequence sequence = null;
-        if (result == Lifter.LEVEL.THIRD) {
-            sequence = buildLevelThree();
-        }
-        drive.followTrajectorySequence(sequence);
+//        Lifter.LEVEL result = Lifter.LEVEL.THIRD;
+//        TrajectorySequence sequence = null;
+//        if (result == Lifter.LEVEL.THIRD) {
+//            sequence = buildLevelThree();
+//        }
+        drive.followTrajectorySequence(levelThree());
     }
 
-    TrajectorySequence buildLevelThree() {
+    TrajectorySequence levelThree() {
         return drive.trajectorySequenceBuilder(startPose)
 
                 //DUCK
@@ -64,7 +64,7 @@ public class AutoRemote extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0.8, () -> lifter.goToPosition(0, Lifter.LEVEL.THIRD))
                 .lineToLinearHeading(shippingHubPose)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> lifter.dumpingBox.setPosition(0.8))
-                .waitSeconds(1.0)
+                .waitSeconds(0.7)
                 .addDisplacementMarker(() -> {
                     lifter.closeBox();
                     lifter.goToPosition(0, Lifter.LEVEL.DOWN);
@@ -79,7 +79,7 @@ public class AutoRemote extends LinearOpMode {
                 })
                 .setVelConstraint(new TranslationalVelocityConstraint(25.0))
                 .lineToLinearHeading(new Pose2d(50.0, -71.0, radians(0.0)))
-                .waitSeconds(1.2)
+                .waitSeconds(1.0)
 
                 //go back now
                 .setReversed(true)
@@ -88,7 +88,7 @@ public class AutoRemote extends LinearOpMode {
                 .resetVelConstraint()
                 .splineToSplineHeading(new Pose2d(-6.0, -46.5, radians(280.0)), radians(80.0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> lifter.dumpingBox.setPosition(0.8))
-                .waitSeconds(0.2)
+                .waitSeconds(0.8)
                 .addDisplacementMarker(() -> {
                     lifter.closeBox();
                     lifter.goToPosition(0, Lifter.LEVEL.DOWN);
@@ -107,7 +107,7 @@ public class AutoRemote extends LinearOpMode {
                 })
                 .setVelConstraint(new TranslationalVelocityConstraint(25.0))
                 .lineToLinearHeading(new Pose2d(52.0, -70.5, radians(20.0)))
-                .waitSeconds(1.2)
+                .waitSeconds(1.0)
 
                 //go back now
                 .setReversed(true)
@@ -116,7 +116,7 @@ public class AutoRemote extends LinearOpMode {
                 .resetVelConstraint()
                 .splineToSplineHeading(new Pose2d(-6.0, -46.5, radians(280.0)), radians(80.0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> lifter.dumpingBox.setPosition(0.8))
-                .waitSeconds(0.2)
+                .waitSeconds(0.8)
                 .addDisplacementMarker(() -> {
                     lifter.closeBox();
                     lifter.goToPosition(0, Lifter.LEVEL.DOWN);
@@ -124,6 +124,11 @@ public class AutoRemote extends LinearOpMode {
                 .setReversed(false)
                 .resetVelConstraint()
 
+                //PARK
+                .setVelConstraint(new TranslationalVelocityConstraint(30.0))
+                .lineToLinearHeading(new Pose2d(6.84, -73.0, radians(0.0)))
+                .setVelConstraint(new TranslationalVelocityConstraint(35.0))
+                .lineToLinearHeading(new Pose2d(52.0, -70.5, radians(20.0)))
                 .build();
     }
 
