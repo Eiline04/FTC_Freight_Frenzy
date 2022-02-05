@@ -10,46 +10,37 @@ public class MeepMeepViz {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
-        Pose2d startPose = new Pose2d(-36.0, -65.0, Math.toRadians(270.0));
+        Pose2d startPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 10.0)
-                .setDimensions(11.96, 13.22)
+                .setDimensions(12.59, 16.14)
 
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(startPose)
-                                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
 
-                                }) //start duck motor
+                                .lineToLinearHeading(new Pose2d(-55.23, -61.0, radians(270.0)))
+                                .waitSeconds(0.7)
 
-                                .lineToLinearHeading(new Pose2d(-55.0, -63.0, radians(270.0)))
-                                .waitSeconds(2.0)
-                                .addDisplacementMarker(() -> {
-
-                                }) //stop duck motor
-
-                                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> {
-
-                                }) //lifter
-
-                                .lineToLinearHeading(new Pose2d(-9.0, -40.0, radians(280.0)))
-                                .waitSeconds(0.8)
-                                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                                }) //lower lifter
+                                .lineToLinearHeading(new Pose2d(-6.0, -46.5, radians(265.0)))
+                                .waitSeconds(1.0)
 
                                 //-START OF CYCLE
-                                .splineToSplineHeading(new Pose2d(9.0, -64.0, radians(350.0)), 0.0)
-                                .addDisplacementMarker(() -> {
-                                }) //start intake
-                                .setVelConstraint(new TranslationalVelocityConstraint(30.0))
-                                .splineToLinearHeading(new Pose2d(50.0, -65.0, radians(0.0)), 0.0)
+                                .setVelConstraint(new TranslationalVelocityConstraint(15.0))
+                                .lineToLinearHeading(new Pose2d(6.84, -73.0, radians(0.0)))
+                                .setVelConstraint(new TranslationalVelocityConstraint(20.0))
+                                .splineToLinearHeading(new Pose2d(50.0, -70.5, radians(0.0)), 0.0)
+                                .waitSeconds(2.0)
+
                                 .setReversed(true)
-                                .waitSeconds(1.2)
-                                .splineToSplineHeading(new Pose2d(9.0, -64.0, radians(355.0)), radians(175.0))
+                                .splineToSplineHeading(new Pose2d(23.3, -72.0, radians(0.0)), radians(180.0))
+                                //.splineToSplineHeading(new Pose2d(9.0, -72.0, radians(355.0)), radians(175.0))
                                 .resetVelConstraint()
-                                .splineToSplineHeading(new Pose2d(-9.0, -40.0, radians(280.0)), radians(80.0))
+                                .splineToSplineHeading(new Pose2d(-6.0, -46.5, radians(280.0)), radians(80.0))
                                 .waitSeconds(0.5)
+                                .setReversed(false)
+                                .resetVelConstraint()
                                 //-----END OF CYCLE----
 
                                 .build()

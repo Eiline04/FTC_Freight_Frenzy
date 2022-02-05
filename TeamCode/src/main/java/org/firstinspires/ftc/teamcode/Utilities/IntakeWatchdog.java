@@ -13,12 +13,12 @@ import org.firstinspires.ftc.teamcode.Wrappers.Intake;
 @Config
 public class IntakeWatchdog {
     private Rev2mDistanceSensor distanceSensor;
-    private double rawDistance;
-    private boolean enabled = false;
+    private volatile double rawDistance;
+    private volatile boolean enabled = false;
     private Intake intake;
 
     public static double DISTANCE_THRESHOLD = 4;
-    public static long WATCHDOG_DELAY = 3;
+    public static long WATCHDOG_DELAY = 2;
     public ElapsedTime timer;
 
     private HardwareMap hardwareMap;
@@ -40,7 +40,7 @@ public class IntakeWatchdog {
         rawDistance = distanceSensor.getDistance(DistanceUnit.CM);
         if (timer.seconds() < WATCHDOG_DELAY) return;
 
-        if (rawDistance < DISTANCE_THRESHOLD) {
+        if (rawDistance < DISTANCE_THRESHOLD && rawDistance != 0.0) {
             intake.raiseIntake();
             intake.stopIntake(200);
             timer.reset();

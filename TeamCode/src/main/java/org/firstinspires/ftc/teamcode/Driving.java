@@ -40,7 +40,6 @@ public class Driving extends LinearOpMode {
         turret = new MeasuringTapeTurret(hardwareMap);
         duckMechanism = new DuckMechanism(hardwareMap);
         intakeWatchdog = new IntakeWatchdog(intake, hardwareMap, telemetry, gamepad1, gamepad2);
-        intakeWatchdog.enable();
 
         controller1 = new ControllerInput(gamepad1);
         controller2 = new ControllerInput(gamepad2);
@@ -51,6 +50,9 @@ public class Driving extends LinearOpMode {
             controller2.update();
             lifter.update();
             intakeWatchdog.update();
+
+            telemetry.addData("Ticks", lifter.getLifterPosition());
+            telemetry.update();
 
             double leftStickY = -controller1.left_stick_y;
             double leftStickX = -controller1.left_stick_x;
@@ -123,18 +125,11 @@ public class Driving extends LinearOpMode {
 
             //Lifter
             if (controller2.rightBumperOnce()) {
-                long waitForTurret = 0;
-                double basePos = turret.getBasePos();
-                if (basePos < 0.97) {
-                    turret.setBasePos(1.0);
-                    //map wait time to distance from 0.97
-                    waitForTurret = (long) Range.scale(basePos, 0.35, 1.0, 700, 10);
-                }
-                lifter.goToPosition(waitForTurret, Lifter.LEVEL.THIRD);
-                lifter.intermediateBoxPosition(300 + waitForTurret);
-                sleep(600 + waitForTurret);
-                lifter.depositMineral();
-                lifter.goToPosition(500 + waitForTurret, Lifter.LEVEL.DOWN);
+                turret.setBasePos(0.98);
+                lifter.goToPosition(0, Lifter.LEVEL.THIRD);
+                lifter.intermediateBoxPosition(200);
+                lifter.depositMineral(500);
+                //lifter.goToPosition(2000, Lifter.LEVEL.DOWN);
             }
 
             if (controller2.leftBumperOnce()) {

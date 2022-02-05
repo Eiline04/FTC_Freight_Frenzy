@@ -9,6 +9,9 @@ import org.firstinspires.ftc.teamcode.Roadrunner.drive.MecanumDriveImpl;
 
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
+
+    Pose2d startPose = new Pose2d(-42.48, -63.0, Math.toRadians(270.0));
+
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
@@ -16,6 +19,7 @@ public class LocalizationTest extends LinearOpMode {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
+        drive.setPoseEstimate(startPose);
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(

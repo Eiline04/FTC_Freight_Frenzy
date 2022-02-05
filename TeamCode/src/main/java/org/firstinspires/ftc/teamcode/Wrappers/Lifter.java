@@ -12,14 +12,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Lifter {
-    private DcMotorEx lifter;  //470 ticks max
+    public DcMotorEx lifterMotor;  //470 ticks max
 
     private PIDFCoefficients pidfCoefficients;
     public static volatile int currentPosition = 0;
 
-    public static volatile boolean box_running = false;
-
-    private Servo dumpingBox;
+    public Servo dumpingBox;
 
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
@@ -38,13 +36,13 @@ public class Lifter {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
-        lifter = hardwareMap.get(DcMotorEx.class, "lifter");
+        lifterMotor = hardwareMap.get(DcMotorEx.class, "lifter");
         dumpingBox = hardwareMap.get(Servo.class, "dumpingBox");
 
-        lifter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lifter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lifter.setDirection(DcMotorSimple.Direction.FORWARD);
+        lifterMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lifterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lifterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lifterMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         lifterThread = new LifterThread();
         Thread lifterRunnable = new Thread(lifterThread);
@@ -65,16 +63,16 @@ public class Lifter {
     }
 
     public void setPIDFCoefficients(PIDFCoefficients pidfs) {
-        this.lifter.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfs);
+        this.lifterMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfs);
         pidfCoefficients = pidfs;
     }
 
     public void update() {
-        currentPosition = lifter.getCurrentPosition();
+        currentPosition = lifterMotor.getCurrentPosition();
     }
 
     public void setLifterPower(double power) {
-        lifter.setPower(power);
+        lifterMotor.setPower(power);
     }
 
     public int getLifterPosition() {
@@ -91,8 +89,6 @@ public class Lifter {
 
     public void openBox(long wait) {
         new Thread(() -> {
-            if (box_running) return; //if another thread is running don't use this one
-            box_running = true;
             if (Thread.currentThread().isInterrupted()) return; //paranoia
 
             if (wait != 0) {
@@ -103,14 +99,11 @@ public class Lifter {
                 }
             }
             openBox();
-            box_running = false;
         }).start();
     }
 
     public void closeBox(long wait) {
         new Thread(() -> {
-            if (box_running) return; //if another thread is running don't use this one
-            box_running = true;
             if (Thread.currentThread().isInterrupted()) return; //paranoia
 
             if (wait != 0) {
@@ -121,7 +114,6 @@ public class Lifter {
                 }
             }
             closeBox();
-            box_running = false;
         }).start();
     }
 
@@ -131,8 +123,6 @@ public class Lifter {
 
     public void intermediateBoxPosition(long wait) {
         new Thread(() -> {
-            if (box_running) return; //if another thread is running don't use this one
-            box_running = true;
             if (Thread.currentThread().isInterrupted()) return; //paranoia
 
             if (wait != 0) {
@@ -143,13 +133,26 @@ public class Lifter {
                 }
             }
             intermediateBoxPosition();
-            box_running = false;
         }).start();
     }
 
-    public void depositMineral() {
-        openBox();
-        closeBox(500);
+    public void depositMineral(long wait) {
+        new Thread(() -> {
+            if (Thread.currentThread().isInterrupted()) return; //paranoia
+
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            openBox();
+            closeBox(500);
+
+        }).start();
+
     }
 
     public void goToPosition(long waitFor, LEVEL level) {
@@ -187,28 +190,48 @@ public class Lifter {
         private volatile int currentTicks = -1;
         private volatile int lastTicks = -1;
 
-        //public double maxVel = 2000;
-
         @Override
         public void run() {
             while (!kill) { //paranoia
                 if (currentTicks == -1) continue;
 
-                lifter.setTargetPosition(currentTicks);
-                lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lifterMotor.setTargetPosition(currentTicks);
+                lifterMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 int direction = currentTicks > lastTicks ? 1 : -1;
                 telemetry.update();
 
-                if (direction == -1) lifter.setVelocity(-700);//-900
-                else lifter.setVelocity(2500);
+                if (direction == -1) lifterMotor.setVelocity(-700);//-900
+                else lifterMotor.setVelocity(1500);
 
                 lastTicks = currentTicks;
-                while (true) {
-                    //stay here until a new value comes in
-                    if (currentTicks != lastTicks) break;
+
+                if (currentTicks < 50) {
+                    lifterMotor.isBusy(); //stupid bug
+                    //we are going completely down so don't bother with pid after the fact
+                    while (lifterMotor.isBusy()) {
+                        //loop
+                    }
+                    lifterMotor.setVelocity(0.0);
+
+                    while (currentTicks == lastTicks) {
+                        //stay here until a new value comes in
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    while (currentTicks == lastTicks) {
+                        //stay here until a new value comes in
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    lifterMotor.setVelocity(0.0);
                 }
-                lifter.setVelocity(0.0);
-                lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
         }
 

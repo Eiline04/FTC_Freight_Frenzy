@@ -28,7 +28,7 @@ public class Intake {
         rightServo = hardwareMap.get(Servo.class, "intakeRightServo");
 
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setPower(0.0);
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -40,12 +40,12 @@ public class Intake {
     }
 
     public void startIntake() {
-        //intake.setPower(0.45 * direction);
-        intake.setVelocity( 50 *direction); //nu e okay
+        //intake.setPower(0.5 * direction);
+        intake.setVelocity(700 * direction);
     }
 
     public void stopIntake() {
-        intake.setPower(0.0);
+        intake.setVelocity(0.0);
     }
 
     public void stopIntake(long wait) {
