@@ -40,7 +40,8 @@ public class Intake {
     }
 
     public void startIntake() {
-        intake.setPower(0.5 * direction);
+        //intake.setPower(0.45 * direction);
+        intake.setVelocity( 50 *direction); //nu e okay
     }
 
     public void stopIntake() {

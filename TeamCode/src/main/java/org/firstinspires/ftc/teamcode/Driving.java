@@ -59,7 +59,7 @@ public class Driving extends LinearOpMode {
             drive.setWeightedDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
 
             //Duck Mechanism
-            if (controller1.AOnce()) {
+            if (controller2.YOnce()) {
                 //start or stop duck motor
                 if (duckMechanism.running) {
                     duckMechanism.stopSpin();
