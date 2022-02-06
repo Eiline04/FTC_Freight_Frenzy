@@ -91,7 +91,7 @@ public class Intake {
     }
 
     public void raiseIntake() {
-        setIntakePosition(0.40);
+        setIntakePosition(0.45);
     }
 
     public void raiseIntake(long wait) {

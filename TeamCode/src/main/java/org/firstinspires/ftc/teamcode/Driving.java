@@ -78,25 +78,25 @@ public class Driving extends LinearOpMode {
 
             if (controller1.dpadLeft()) {
                 //move base left
-                baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0.35, 0.85);
+                baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0.1, 1.00);
                 turret.setBasePos(baseServoPosition);
             }
 
             if (controller1.dpadRight()) {
                 //move base right
-                baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0.35, 0.85);
+                baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0.1, 1.00);
                 turret.setBasePos(baseServoPosition);
             }
 
             if (controller1.dpadUp()) {
                 //move angle up
-                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.35);
+                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.45);
                 turret.setAnglePos(angleServoPosition);
             }
 
             if (controller1.dpadDown()) {
                 //move angle down
-                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.35);
+                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.45);
                 turret.setAnglePos(angleServoPosition);
             }
 
