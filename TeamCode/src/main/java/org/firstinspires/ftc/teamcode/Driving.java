@@ -125,18 +125,34 @@ public class Driving extends LinearOpMode {
             }
 
             //Lifter
-            if (controller2.rightBumperOnce()) {
+            if(controller2.leftBumperOnce()){
                 turret.setBasePos(0.98);
-                lifter.goToPosition(0, Lifter.LEVEL.THIRD);
+                sleep(200);
+                lifter.goThird();
                 lifter.intermediateBoxPosition(200);
                 lifter.depositMineral(500);
-                //lifter.goToPosition(2000, Lifter.LEVEL.DOWN);
+
+                lifter.closeBox();
+                sleep(1200);
+                lifter.goDown();
             }
 
-            if (controller2.leftBumperOnce()) {
-                lifter.closeBox();
-                lifter.goToPosition(0, Lifter.LEVEL.DOWN);
-            }
+//            if (controller2.rightBumperOnce()) {
+//                turret.setBasePos(0.98);
+//                sleep(200);
+//                lifter.goThird();
+//                //lifter.goToPosition(0, Lifter.LEVEL.THIRD);
+//                lifter.intermediateBoxPosition(200);
+//                lifter.depositMineral(500);
+//                //lifter.goToPosition(2000, Lifter.LEVEL.DOWN);
+//            }
+//
+//            if (controller2.leftBumperOnce()) {
+//                lifter.closeBox();
+//                //lifter.goToPosition(0, Lifter.LEVEL.DOWN);
+//                sleep(200);
+//                lifter.goDown();
+//            }
 
             //-----------MANUAL CONTROL---------------
 //            double lifterUp = controller2.right_trigger;

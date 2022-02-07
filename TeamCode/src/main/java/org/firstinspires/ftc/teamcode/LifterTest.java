@@ -34,12 +34,12 @@ public class LifterTest extends LinearOpMode {
                 lifter.goToPosition(0, Lifter.LEVEL.THIRD);
                 lifter.intermediateBoxPosition(200);
                 lifter.depositMineral(500);
-                lifter.goToPosition(2000, Lifter.LEVEL.DOWN);
+                lifter.goToPosition(0, Lifter.LEVEL.DOWN);
             }
 
             if (controller2.leftBumperOnce()) {
                 lifter.closeBox();
-                lifter.goToPosition(0, Lifter.LEVEL.DOWN);
+                lifter.goToPosition(2000, Lifter.LEVEL.DOWN);
             }
 
             //-----------MANUAL LIFTER CONTROL---------------

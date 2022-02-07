@@ -25,7 +25,7 @@ public class Lifter {
     public LifterThread lifterThread;
 
     public enum LEVEL {
-        DOWN(20), FIRST(150), SECOND(300), THIRD(450);
+        DOWN(-10), FIRST(150), SECOND(300), THIRD(500);//down 20; third 450
         public int ticks;
 
         LEVEL(int ticks) {
@@ -85,7 +85,7 @@ public class Lifter {
     }
 
     public void closeBox() {
-        dumpingBox.setPosition(0.0);
+        dumpingBox.setPosition(0.1);
     }
 
     public void openBox(long wait) {
@@ -117,6 +117,7 @@ public class Lifter {
             closeBox();
         }).start();
     }
+
 
     public void intermediateBoxPosition() {
         dumpingBox.setPosition(0.5);
@@ -184,6 +185,44 @@ public class Lifter {
             }
             lifterThread.setTicks(targetPosition);
         }).start();
+    }
+
+    public void goDown(){
+       lifterMotor.setTargetPosition(LEVEL.DOWN.ticks);
+       lifterMotor.setVelocity(-900);
+        while(lifterMotor.getCurrentPosition() > 50){
+
+        }
+        lifterMotor.setVelocity(0);
+    }
+    public void goThird(){
+        lifterMotor.setTargetPosition(500);
+        lifterMotor.setVelocity(1000);
+        while(lifterMotor.getCurrentPosition() < 450){
+
+        }
+        lifterMotor.setVelocity(0);
+    }
+
+    public void goToPosTicks(int ticks, int direction){
+        lifterMotor.setTargetPosition(ticks);
+        lifterMotor.setVelocity(1000 * direction);
+
+        if(direction<0){
+            while(lifterMotor.getCurrentPosition() > ticks + 50){
+
+            }
+        lifterMotor.setVelocity(0);
+        }
+        else {
+            while(lifterMotor.getCurrentPosition() < ticks - 50){
+
+            }
+            lifterMotor.setVelocity(0);
+            
+        }
+
+
     }
 
     class LifterThread implements Runnable {
